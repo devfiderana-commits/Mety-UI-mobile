@@ -1,47 +1,48 @@
 name: Android Build
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+push:
+branches: [ main, master ]
+pull_request:
+branches: [ main, master ]
+workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: gradle
+  - name: Set up JDK 17
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
+      cache: gradle
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+  - name: Set up Android SDK
+    uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK packages
-        shell: bash
-        run: |
-          set -euxo pipefail
-          yes | "$ANDROID_HOME"/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null || true
-          "$ANDROID_HOME"/cmdline-tools/latest/bin/sdkmanager --sdk_root="$ANDROID_HOME" \
-            "platform-tools" \
-            "platforms;android-36" \
-            "build-tools;36.0.0"
+  - name: Install Android SDK packages
+    run: |
+      sdkmanager "platform-tools"
+      sdkmanager "platforms;android-36"
+      sdkmanager "build-tools;36.0.0"
 
-      - name: Grant execute permission for Gradlew
-        run: chmod +x ./gradlew
+  - name: Grant execute permission for Gradlew
+    run: chmod +x ./gradlew
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug
+  - name: Verify Gradle
+    run: ./gradlew --version
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+  - name: Build release APK
+    run: ./gradlew assembleRelease
+
+  - name: Upload APK artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: app-release-apk
+      path: app/build/outputs/apk/release/*.apk
+      if-no-files-found: error
