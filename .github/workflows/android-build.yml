@@ -1,23 +1,21 @@
 name: Android Build
 
-"on":
+on:
 push:
 branches:
 - main
 - master
-
 pull_request:
 branches:
 - main
 - master
-
 workflow_dispatch:
 
 jobs:
 build:
 runs-on: ubuntu-latest
 
-```
+
 steps:
   - name: Checkout repository
     uses: actions/checkout@v4
@@ -53,4 +51,4 @@ steps:
       name: app-release-apk
       path: app/build/outputs/apk/release/*.apk
       if-no-files-found: error
-```
+
